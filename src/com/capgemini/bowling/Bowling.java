@@ -15,35 +15,39 @@ public class Bowling implements BowlingGameResultCalculator {
 	 */
 	public void roll(int numberOfPins) {
 		
-		scores[turn] += numberOfPins; //powiekszenie wyniku aktualnej tury
-		
-		if (turn > 0) { //powiekszenie wyniku poprzednich tur
-			for (int i = 0; i < turn; i++) {
-				if (bonus_indicator[i] > 0) {
-					bonus_indicator[i] -= 1;
-					scores[i] += numberOfPins;
+		if (isFinished()) throw new IllegalStateException();
+		else{
+			scores[turn] += numberOfPins; //powiekszenie wyniku aktualnej tury
+			
+			if (turn > 0) { //powiekszenie wyniku poprzednich tur
+				for (int i = 0; i < turn; i++) {
+					if (bonus_indicator[i] > 0) {
+						bonus_indicator[i] -= 1;
+						scores[i] += numberOfPins;
+					}
 				}
+			}	
+			
+			//zmiany wskaznika drugiego rzutu oraz przypisanie rzutow do tablicy rzutow
+			if (numberOfPins != 10 && second_indicator == 0) {
+				rolls[turn][0] = numberOfPins;
+				second_indicator = 1;
 			}
-		}	
-		
-		//zmiany wskaznika drugiego rzutu oraz przypisanie rzutow do tablicy rzutow
-		if (numberOfPins != 10 && second_indicator == 0) {
-			rolls[turn][0] = numberOfPins;
-			second_indicator = 1;
-		}
-		else if (numberOfPins == 10 && second_indicator == 0) {
-			rolls[turn][0] = numberOfPins;
-			bonus_indicator[turn] = 2;
-			turn++;
-		}
-		else {
-			rolls[turn][1] = numberOfPins;
-			second_indicator = 0;
-			if ((rolls[turn][0] + rolls[turn][1]) == 10) bonus_indicator[turn] = 1;
-			turn++;
+			else if (numberOfPins == 10 && second_indicator == 0) {
+				rolls[turn][0] = numberOfPins;
+				bonus_indicator[turn] = 2;
+				turn++;
+			}
+			else {
+				rolls[turn][1] = numberOfPins;
+				second_indicator = 0;
+				if ((rolls[turn][0] + rolls[turn][1]) == 10) bonus_indicator[turn] = 1;
+				turn++;
+			}
+			
+			if (turn == 10 && (rolls[turn-1][0] + rolls[turn-1][1]) == 10) scores[turn-1] += 10; //bonus ostatniej tury
 		}
 		
-		if (turn == 10 && (rolls[turn-1][0] + rolls[turn-1][1]) == 10) scores[turn-1] += 10; //bonus ostatniej tury
 	}
 
 	/**
