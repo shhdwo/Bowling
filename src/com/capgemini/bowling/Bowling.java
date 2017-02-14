@@ -2,38 +2,26 @@ package com.capgemini.bowling;
 
 public class Bowling implements BowlingGameResultCalculator {
 	
-	int total = 0;
-	int[][] rolls = new int[10][2];
-	int[] scores = new int[10];
-	int[] bonus_indicator = new int[10]; //licznik pozostalych do przydzielenia bonusow dla kazdej tury
+	private int total = 0;
+	private int[][] rolls = new int[11][2]; //tablica na 10 tur po 2 rzuty, 11 tura tylko w przypadku gdy w 10. rzucimy dwa razy "10"
+	private int[] scores = new int[11];
+	private int[] bonus_indicator = new int[11]; //licznik pozostalych do przydzielenia bonusow dla kazdej tury
+	private int second_indicator = 0; //wskaznik drugiego rzutu, pierwszy rzut = 0, drugi = 1
 	int turn = 0; //tury od 0 od 9
-	int second_indicator = 0; //wskaznik drugiego rzutu, pierwszy rzut = 0, drugi = 1
 	
 	/**
 	 * Register a thrown a ball.
 	 * @param numberOfPins number of knocked down pins
 	 */
 	public void roll(int numberOfPins) {
-		
 		if (isFinished()) throw new IllegalStateException();
-		else{
-			scores[turn] += numberOfPins; //powiekszenie wyniku aktualnej tury
-			
-			if (turn > 0) { //powiekszenie wyniku poprzednich tur
-				for (int i = 0; i < turn; i++) {
-					if (bonus_indicator[i] > 0) {
-						bonus_indicator[i] -= 1;
-						scores[i] += numberOfPins;
-					}
-				}
-			}	
-			
+		else{			
 			//zmiany wskaznika drugiego rzutu oraz przypisanie rzutow do tablicy rzutow
-			if (numberOfPins != 10 && second_indicator == 0) {
+			if ((numberOfPins != 10 && second_indicator == 0) || (numberOfPins == 10 && second_indicator == 0 && turn == 9 )) {
 				rolls[turn][0] = numberOfPins;
 				second_indicator = 1;
 			}
-			else if (numberOfPins == 10 && second_indicator == 0) {
+			else if (numberOfPins == 10 && second_indicator == 0 && turn != 9) {
 				rolls[turn][0] = numberOfPins;
 				bonus_indicator[turn] = 2;
 				turn++;
@@ -41,19 +29,26 @@ public class Bowling implements BowlingGameResultCalculator {
 			else {
 				rolls[turn][1] = numberOfPins;
 				second_indicator = 0;
-				if ((rolls[turn][0] + rolls[turn][1]) == 10) bonus_indicator[turn] = 1;
+				if ((rolls[turn][0] + rolls[turn][1]) == 10 || (rolls[turn][0] + rolls[turn][1]) == 20) bonus_indicator[turn] = 1;
 				turn++;
 			}
-			
-			if (turn == 10 && (rolls[turn-1][0] + rolls[turn-1][1]) == 10) scores[turn-1] += 10; //bonus ostatniej tury
 		}
-		
 	}
 
 	/**
 	 * @return current game score
 	 */
 	public int score() {
+		for (int i = 0; i < 10; i++) {
+			scores[i] += rolls[i][0] + rolls[i][1]; 
+			if (bonus_indicator[i] > 0) { 
+				scores[i] += rolls[i+1][0];
+				if (bonus_indicator[i] == 2) {
+					if (rolls[i+1][0] != 10 || (i == 8 && rolls[i+1][0] == 10)) scores[i] += rolls[i+1][1];
+					else if (i < 8 && rolls[i+1][0] == 10) scores[i] += rolls[i+2][0];
+				}
+			}
+		}
 		total = 0;
 		for (int element : scores) total += element;
 		return total;
@@ -63,7 +58,7 @@ public class Bowling implements BowlingGameResultCalculator {
 	 * @return true if a game is over, otherwise false
 	 */
 	public boolean isFinished() {
-		if (turn > 9) return true; 
-		else return false;
+		if (turn < 10 || (turn == 10 && rolls[9][1] == 10)) return false;
+		else return true;
 	}
 }
