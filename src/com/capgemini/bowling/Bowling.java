@@ -3,7 +3,7 @@ package com.capgemini.bowling;
 public class Bowling implements BowlingGameResultCalculator {
 	
 	private int total = 0;
-	private int[][] rolls = new int[11][2]; //tablica na 10 tur po 2 rzuty, 11 tura tylko w przypadku gdy w 10. rzucimy dwa razy "10"
+	private int[][] rolls = new int[11][2]; //tablica na 10 tur po 2 rzuty, 11 tura tylko w przypadku gdy w 10. rzucimy "10"
 	private int[] scores = new int[11];
 	private int[] bonus_indicator = new int[11]; //licznik pozostalych do przydzielenia bonusow dla kazdej tury
 	private int second_indicator = 0; //wskaznik drugiego rzutu, pierwszy rzut = 0, drugi = 1
